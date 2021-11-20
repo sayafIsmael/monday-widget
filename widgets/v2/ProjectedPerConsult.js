@@ -25,7 +25,8 @@ class App extends React.Component {
       name: "",
       boardData: {},
       filteredStatusCount: 0,
-      allItemsCount: 0
+      allItemsCount: 0,
+      paymentstatusCount: 0
     };
   }
 
@@ -41,10 +42,6 @@ class App extends React.Component {
         boards(ids: 1676895469) {
           items{
             name
-            column_values {
-              id
-              text
-            }
           }
         }
       }`,
@@ -52,49 +49,42 @@ class App extends React.Component {
       )
         .then(res => {
           console.log("Res  all:", res.data.boards[0].items.length)
-          const allData = []
-          const filteredData = []
-          res.data.boards[0].items.map(item => allData.push(item.column_values))
-          allData.map((item, i) => {
-            item.map(field => {
-              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                filteredData.push(field.id)
-              }
-            })
-          })
-          this.setState({ allItemsCount: filteredData.length })
+          this.setState({ allItemsCount: res.data.boards[0].items.length })
         });
-      monday.api(`query { items_by_multiple_column_values (board_id: 1676895469, column_id: "dropdown", column_values: ["Approval", "Decline", "Partial"]) 
-      { name  
-        column_values {
-        id
-        text
-      }} }`,
+      monday.api(`{
+          items_by_multiple_column_values(board_id: 1676895469, column_id: "status", column_values: ["Projected"]) {
+            name
+            column_values {
+              id
+              text
+            }
+          }
+        }`,
         { variables: { boardIds: this.state.context.boardIds } }
       )
         .then(res => {
-          console.log("Res data:", res.data.items_by_multiple_column_values)
+          console.log("Res paymentstatusCount:", res.data.items_by_multiple_column_values.length)
           const allData = []
-          const filteredStatus = []
+          const paymentstatus = []
 
           res.data.items_by_multiple_column_values.map(item => allData.push(item.column_values))
           allData.map((item, i) => {
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                filteredStatus.push(field.id)
+                paymentstatus.push(field.id)
               }
             })
           })
-          this.setState({ filteredStatusCount: filteredStatus.length });
-        });
 
+          this.setState({ paymentstatusCount: paymentstatus.length })
+        });
     })
 
 
   }
 
   render() {
-    return <div className="App" style={{ background: (this.state.settings.background) }}>
+    return <div className="App" style={{ background: (this.state.settings.background),  overflow: 'hidden' }}>
       {/* <Card title="Percentage Attempting Finance" extra={<FilterOutlined />} style={{ width: 400, marginLeft: 20 }}>
         <Title level={2}
           style={{ textAlign: 'center' }}
@@ -104,11 +94,12 @@ class App extends React.Component {
         style={{
           textAlign: 'center',
           alignSelf: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          overflow: 'hidden'
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{(parseFloat((this.state.filteredStatusCount / this.state.allItemsCount) * 100) || 0).toFixed(1)}%</h2>
+        <h2 style={{ fontSize: 75 }}>{(parseFloat((this.state.paymentstatusCount / this.state.allItemsCount) * 100) || 0).toFixed(1)}%</h2>
       </div>
 
     </div>;

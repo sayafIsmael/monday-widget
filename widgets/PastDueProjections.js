@@ -53,7 +53,7 @@ class App extends React.Component {
           allData.map((item, i) => {
             const currentDate = new Date()
             item.map(field => {
-              if (field.id == "date4" && field.text && moment().isAfter(field.text, 'day')) {
+              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
                 console.log(field.text)
                 allData[i].map(data => {
                   if (data.id == "numbers_13" && data.text) {
