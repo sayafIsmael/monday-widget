@@ -23,8 +23,8 @@ class App extends React.Component {
       settings: {},
       name: "",
       boardData: {},
-      totalConverted: 0,
-      totalLead: 0
+      totalConvertedBlank: 0,
+      totalConverted: 0
     };
   }
 
@@ -51,26 +51,47 @@ class App extends React.Component {
       )
         .then(res => {
           const allData = []
+          const totalConvertedBlank = []
           const totalConverted = []
           const totalLead = []
 
           res.data.boards[0].items.map(item => allData.push(item.column_values))
-
           allData.map((item, i) => {
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
                 totalLead.push(field.text)
+                //     // console.log("date ok")
+                //     // allData[i].map(field2 => {
+                //     if (field.id == "date4" && (field.text != null || field.text != "")) {
+                //         console.log("status null push ok")
+                //         totalConvertedBlank.push(field.text)
+                //     }
+                //     // })
+                //     // }
+                allData[i].map(field3 => {
+                  if (field3.id == "status" && field3.text == "Converted") {
+                    console.log("status Convert push ok")
+                    totalConverted.push(field3.text)
+                  }
+                })
               }
             })
+
           })
 
+          // if (totalConverted.length && totalConvertedBlank.length) {
           this.setState({
-            totalLead: totalLead.length,
+            totalConverted: totalConverted.length || 0,
+            totalLead: totalLead.length
+            // totalConvertedBlank: totalConvertedBlank.length || 0
+          })
+          // }
+          console.log({
+            totalConverted: totalConverted.length || 0,
+            totalLead: totalLead.length
+            // totalConvertedBlank: totalConvertedBlank.length || 0
           })
 
-          console.log({
-            totalLead: totalLead.length,
-          })
 
         });
 
@@ -94,7 +115,7 @@ class App extends React.Component {
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>
+        <h2 style={{ fontSize: 75 }}>{((parseFloat(this.state.totalConverted) / parseFloat(this.state.totalLead)) * 100 || 0).toFixed(1)}%</h2>
       </div>
 
     </div>;

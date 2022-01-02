@@ -23,8 +23,7 @@ class App extends React.Component {
       settings: {},
       name: "",
       boardData: {},
-      totalConverted: 0,
-      totalLead: 0
+      result: 0
     };
   }
 
@@ -37,13 +36,11 @@ class App extends React.Component {
       this.setState({ context: res.data });
       console.log(res.data);
       monday.api(`{
-        boards(ids: 1890240262) {
-          items {
-            name
-            column_values {
-              id
-              text
-            }
+        items_by_multiple_column_values(board_id: 1676895469, column_id: "status_10", column_values: ["Projected"]) {
+          name
+          column_values {
+            id
+            text
           }
         }
       }`,
@@ -51,27 +48,31 @@ class App extends React.Component {
       )
         .then(res => {
           const allData = []
-          const totalConverted = []
-          const totalLead = []
-
-          res.data.boards[0].items.map(item => allData.push(item.column_values))
-
+          const amounts = []
+          res.data.items_by_multiple_column_values.map(item => allData.push(item.column_values))
           allData.map((item, i) => {
+            const currentDate = new Date()
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                totalLead.push(field.text)
+                console.log(field.text)
+                allData[i].map(data => {
+                  if (data.id == "numbers_13" && data.text) {
+                    allData[i].map((_data) => {
+                      if (_data.id == "status_16" && _data.text == "Huntington Beach") {
+                        console.log("data", data.text)
+                        amounts.push(data.text)
+                      }
+                    })
+                  }
+                })
               }
             })
           })
-
-          this.setState({
-            totalLead: totalLead.length,
-          })
-
-          console.log({
-            totalLead: totalLead.length,
-          })
-
+          const result = amounts.reduce((a, b) => Number(a) + Number(b), 0)
+          console.log("Res  smartstylesCount:", amounts.reduce((a, b) => Number(a) + Number(b), 0))
+          if (result) {
+            this.setState({ result })
+          }
         });
 
     })
@@ -94,7 +95,7 @@ class App extends React.Component {
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>
+        <h2 style={{ fontSize: 75 }}>${this.state.result}</h2>
       </div>
 
     </div>;

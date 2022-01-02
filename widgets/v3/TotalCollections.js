@@ -23,8 +23,11 @@ class App extends React.Component {
       settings: {},
       name: "",
       boardData: {},
-      totalConverted: 0,
-      totalLead: 0
+      result: 0,
+      dueToDentist: 0,
+      collected: 0,
+      merchantfee: 0,
+      merchantfeeSplit: 0
     };
   }
 
@@ -37,7 +40,7 @@ class App extends React.Component {
       this.setState({ context: res.data });
       console.log(res.data);
       monday.api(`{
-        boards(ids: 1890240262) {
+        boards(ids: 1676895469) {
           items {
             name
             column_values {
@@ -51,25 +54,47 @@ class App extends React.Component {
       )
         .then(res => {
           const allData = []
-          const totalConverted = []
-          const totalLead = []
+          const collected = []
+          const dueToDentist = []
+          const merchantfee = []
+          const merchantfeeSplit = []
 
           res.data.boards[0].items.map(item => allData.push(item.column_values))
-
           allData.map((item, i) => {
             item.map(field => {
-              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                totalLead.push(field.text)
+              if (field.id == "date7" && field.text && moment().format("M") == moment(field.text).format("M")) {
+
+                allData[i].map((_data) => {
+                  if (_data.id == "status_16" && _data.text == "Huntington Beach") {
+
+                    allData[i].map(field2 => {
+                      if (field2.id == "numbers_199" && field2.text) {
+                        dueToDentist.push(field2.text)
+                      }
+                      if (field2.id == "numbers_19" && field2.text) {
+                        collected.push(field2.text)
+                      }
+                      if (field2.id == "numbers_2" && field2.text) {
+                        merchantfee.push(field2.text)
+                      }
+                      if (field2.id == "numbers_3" && field2.text) {
+                        merchantfeeSplit.push(field2.text)
+                      }
+                    })
+
+                  }
+                })
+
+
               }
             })
           })
 
           this.setState({
-            totalLead: totalLead.length,
-          })
-
-          console.log({
-            totalLead: totalLead.length,
+            collected: collected.reduce((a, b) => Number(a) + Number(b), 0),
+            merchantfee: merchantfee.reduce((a, b) => Number(a) + Number(b), 0),
+            merchantfeeSplit: merchantfeeSplit.reduce((a, b) => Number(a) + Number(b), 0),
+            dueToDentist: dueToDentist.reduce((a, b) => Number(a) + Number(b), 0)
           })
 
         });
@@ -94,7 +119,7 @@ class App extends React.Component {
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>
+        <h2 style={{ fontSize: 75 }}>${(parseFloat((this.state.collected - (this.state.merchantfee + this.state.dueToDentist)) + this.state.merchantfeeSplit) || 0).toFixed(1)}</h2>
       </div>
 
     </div>;

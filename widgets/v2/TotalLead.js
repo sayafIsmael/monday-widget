@@ -55,11 +55,11 @@ class App extends React.Component {
           const totalLead = []
 
           res.data.boards[0].items.map(item => allData.push(item.column_values))
-
+          
           allData.map((item, i) => {
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                totalLead.push(field.text)
+                totalLead.push(i)
               }
             })
           })
@@ -68,7 +68,7 @@ class App extends React.Component {
             totalLead: totalLead.length,
           })
 
-          console.log({
+          console.log("totalLead",{
             totalLead: totalLead.length,
           })
 

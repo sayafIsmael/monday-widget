@@ -55,21 +55,30 @@ class App extends React.Component {
           const totalLead = []
 
           res.data.boards[0].items.map(item => allData.push(item.column_values))
-
           allData.map((item, i) => {
             item.map(field => {
-              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
+              if (field.id == "status9" && field.text == "Appointment Shown") {
+                allData[i].map(field2 => {
+                  if (field2.id == "date4" && (field2.text != null || field2.text != "") && moment().format("M") == moment(field2.text).format("M")) {
+                    totalConverted.push(field2.text)
+                  }
+                })
+              }
+
+              if (field.id == "date4" &&  (field.text != null || field.text != "") && moment().format("M") == moment(field.text).format("M")) {
                 totalLead.push(field.text)
               }
             })
           })
 
           this.setState({
-            totalLead: totalLead.length,
+            totalLead: allData.length,
+            totalConverted: totalConverted.length
           })
 
           console.log({
-            totalLead: totalLead.length,
+            totalLead: allData.length,
+            totalConverted: totalConverted.length
           })
 
         });
@@ -94,7 +103,7 @@ class App extends React.Component {
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>
+        <h2 style={{ fontSize: 75 }}>{(parseFloat((this.state.totalConverted / this.state.totalLead) * 100) || 0).toFixed(1)}%</h2>
       </div>
 
     </div>;
