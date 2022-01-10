@@ -68,7 +68,7 @@ class App extends React.Component {
           const tcr = []
 
           res.data.items_by_multiple_column_values.map(item => allData.push(item.column_values))
-          allData.map((item, i) => {iiiiiiiiiiiiiiiiiiiii
+          allData.map((item, i) => {
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
                 allData[i].map(_data => {
