@@ -32,7 +32,8 @@ class App extends React.Component {
       smileStyledScheduled: [],
       sameDayLifeChanged: [],
       cancelled: [],
-      numberOfitems: []
+      numberOfitems: [],
+      totalCollected:0
     };
   }
 
@@ -60,7 +61,7 @@ class App extends React.Component {
         .then(res => {
           const allData = []
           const finalData = []
-          console.log("res.data: ",res.data.boards[0].items)
+          console.log("res.data: ", res.data.boards[0].items)
           res.data.boards[0].items.map(item => allData.push(item.column_values))
 
           allData.map((item, i) => {
@@ -72,8 +73,8 @@ class App extends React.Component {
           })
 
           this.setState({ allItemsCount: finalData.length })
-          console.log("allData.length: ",finalData.length )
-          
+          console.log("allData.length: ", finalData.length)
+
         });
       monday.api(`{
         items_by_multiple_column_values(board_id: 1676895469, column_id: "status_8",
@@ -99,13 +100,17 @@ class App extends React.Component {
           const sameDayLifeChanged = []
           const cancelled = []
           const numberOfitems = []
+          const totalCollected = []
 
           allData.map((item, i) => {
             item.map(field => {
-              if (field.id == "status_8" && (field.text == "Pipeline")) {
-                if (field.id == "date9" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                  pipeline.push(field.id)
-                }
+              if (field.id == "date9" && field.text && moment().format("M") == moment(field.text).format("M")) {
+                allData[i].map(field2 => {
+                  if (field2.id == "status_8" && (field2.text == "Pipeline")) {
+                    console.log("Pipeline value: ", field2.id)
+                    pipeline.push(field2.id)
+                  }
+                })
               }
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
                 numberOfitems.push(field.text)
@@ -128,6 +133,10 @@ class App extends React.Component {
                         cancelled.push(field2.id)
                       }
 
+                      if (field2.id == "numbers_19" && field2.text) {
+                        console.log("totalCollected.push: ",field2.text)
+                        totalCollected.push(field2.text)
+                      }
 
                       // if (field2.id == "status_4" && field2.text == "" || field2.text == null) {
                       //   allData[i].map(field3 => {
@@ -150,11 +159,12 @@ class App extends React.Component {
             })
           })
 
-          this.setState({ callBack, pipeline, smileStyledScheduled, sameDayLifeChanged, cancelled, numberOfitems })
+          this.setState({ callBack, pipeline, smileStyledScheduled, sameDayLifeChanged, cancelled, numberOfitems, 
+            totalCollected:  totalCollected.reduce((a, b) => Number(a) + Number(b), 0) })
 
           const liveschangesCount = tcr.reduce((a, b) => Number(a) + Number(b), 0)
 
-          console.log("TCR: ", tcr)
+          console.log("totalCollected: ", totalCollected.reduce((a, b) => Number(a) + Number(b), 0))
 
           this.setState({
             liveschangesCount,
@@ -172,7 +182,7 @@ class App extends React.Component {
   getCallbackValue() {
     let res = parseFloat(this.state.callBack.length) / parseFloat(this.state.allItemsCount)
     // console.log("getCallbackValue: ", this.state.callBack.length, this.state.allItemsCount)
-    let add = parseFloat(res) * .04
+    let add = parseFloat(res) * (.02 * this.state.callBack.length)
     return (parseFloat(res) + parseFloat(add)) * parseFloat(this.state.callBack.length)
   }
 
@@ -191,7 +201,7 @@ class App extends React.Component {
   getCancelledValue() {
     let res = parseFloat(this.state.cancelled.length) / parseFloat(this.state.allItemsCount)
     console.log("cancelledValue: ", this.state.cancelled.length)
-    let add = parseFloat(res) * .05
+    let add = parseFloat(res) * (.02 * this.state.cancelled.length)
     return (parseFloat(res) + parseFloat(add)) * parseFloat(this.state.cancelled.length)
   }
 
@@ -220,7 +230,7 @@ class App extends React.Component {
         }}
       >
         {/* <h2>Percentage Attempting Finance</h2> */}
-        <h2 style={{ fontSize: 75 }}>{((this.getData() * 100) || 0).toFixed(1)}%</h2>
+        <h2 style={{ fontSize: 75 }}>{(this.state.totalCollected < 1000) && "-"}{((this.getData() * 100) || 0).toFixed(1)}%</h2>
       </div>
 
     </div>;
