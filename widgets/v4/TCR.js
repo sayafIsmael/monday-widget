@@ -47,14 +47,32 @@ class App extends React.Component {
         boards(ids: 1676895469) {
           items{
             name
+            column_values {
+              id
+              text
+            }
           }
         }
       }`,
         { variables: { boardIds: this.state.context.boardIds } }
       )
         .then(res => {
-          console.log("Res  all:", res.data.boards[0].items.length)
-          this.setState({ allItemsCount: res.data.boards[0].items.length })
+          const allData = []
+          const finalData = []
+          console.log("res.data: ",res.data.boards[0].items)
+          res.data.boards[0].items.map(item => allData.push(item.column_values))
+
+          allData.map((item, i) => {
+            item.map(field => {
+              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
+                finalData.push(field.id)
+              }
+            })
+          })
+
+          this.setState({ allItemsCount: finalData.length })
+          console.log("allData.length: ",finalData.length )
+          
         });
       monday.api(`{
         items_by_multiple_column_values(board_id: 1676895469, column_id: "status_8",
@@ -179,7 +197,7 @@ class App extends React.Component {
     console.log("this.getSameDayLifeChangedValue()", this.getSameDayLifeChangedValue())
     console.log("this.getCancelledValue()", this.getCancelledValue())
 
-    return (this.getCallbackValue() - this.getPipelineValue() + this.getSmileStyledScheduledValue() + this.getSameDayLifeChangedValue() - this.getCancelledValue())/11
+    return (this.getCallbackValue() - this.getPipelineValue() + this.getSmileStyledScheduledValue() + this.getSameDayLifeChangedValue() - this.getCancelledValue()) / 11
   }
 
   render() {
