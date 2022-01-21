@@ -104,7 +104,7 @@ class App extends React.Component {
 
           allData.map((item, i) => {
             item.map(field => {
-              if (field.id == "date9" && field.text && moment().format("M") == moment(field.text).format("M")) {
+              if (field.id == "creation_log" && field.text && moment().format("M") == moment(field.text).format("M")) {
                 allData[i].map(field2 => {
                   if (field2.id == "status_8" && (field2.text == "Pipeline")) {
                     console.log("Pipeline value: ", field2.id)
