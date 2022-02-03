@@ -30,10 +30,11 @@ class App extends React.Component {
       context: {},
       settings: {},
       name: "",
-      filterBy: "All",
       boardData: {},
+      loading: false,
+      totalConvertedBlank: 0,
       totalConverted: 0,
-      totalLead: 0,
+      filterBy: "All",
       people: []
     };
     this.getMenuItem()
@@ -88,7 +89,6 @@ class App extends React.Component {
 
   syncData = () => {
     this.setState({ loading: true })
-
     monday.listen("settings", res => {
       this.setState({ settings: res.data });
     });
@@ -119,9 +119,9 @@ class App extends React.Component {
       )
         .then(res => {
           const allData = []
+          const totalConvertedBlank = []
           const totalConverted = []
           const totalLead = []
-          const allPeople = []
 
           if (res.data.boards) {
             res.data.boards[0].items.map(item => allData.push(item.column_values))
@@ -132,22 +132,44 @@ class App extends React.Component {
           allData.map((item, i) => {
             item.map(field => {
               if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
-                totalLead.push(i)
+                totalLead.push(field.text)
+                //     // console.log("date ok")
+                //     // allData[i].map(field2 => {
+                //     if (field.id == "date4" && (field.text != null || field.text != "")) {
+                //         console.log("status null push ok")
+                //         totalConvertedBlank.push(field.text)
+                //     }
+                //     // })
+                //     // }
+                allData[i].map(field3 => {
+                  if (field3.id == "status" && field3.text == "Converted") {
+                    console.log("status Convert push ok")
+                    totalConverted.push(field3.text)
+                  }
+                })
               }
             })
+
           })
 
+          // if (totalConverted.length && totalConvertedBlank.length) {
           this.setState({
+            totalConverted: totalConverted.length || 0,
             totalLead: totalLead.length,
             loading: false
+            // totalConvertedBlank: totalConvertedBlank.length || 0
+          })
+          // }
+          console.log({
+            totalConverted: totalConverted.length || 0,
+            totalLead: totalLead.length
+            // totalConvertedBlank: totalConvertedBlank.length || 0
           })
 
 
         });
-
     })
   }
-
 
   componentDidMount() {
     this.syncData()
@@ -158,7 +180,7 @@ class App extends React.Component {
     this.setState({ filterBy: event.target.value });
     this.syncData()
   };
-
+  
   render() {
     return <div className="App" style={{ background: (this.state.settings.background) }}>
       {/* <Card title="Percentage Attempting Finance" extra={<FilterOutlined />} style={{ width: 400, marginLeft: 20 }}>
@@ -202,7 +224,7 @@ class App extends React.Component {
         {this.state.loading && <div style={{ margin: "auto", maxWidth: 71 }}>
           <ReactLoading type={"bubbles"} color="#0073ea" />
         </div>}
-        {!this.state.loading && <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>}
+        {!this.state.loading && <h2 style={{ fontSize: 75 }}>{((parseFloat(this.state.totalConverted) / parseFloat(this.state.totalLead)) * 100 || 0).toFixed(1)}%</h2>}
       </div>
 
     </div>;

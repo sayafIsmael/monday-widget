@@ -31,6 +31,7 @@ class App extends React.Component {
       settings: {},
       name: "",
       filterBy: "All",
+      loading: false,
       boardData: {},
       totalConverted: 0,
       totalLead: 0,
