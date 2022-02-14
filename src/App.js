@@ -30,25 +30,34 @@ class App extends React.Component {
       context: {},
       settings: {},
       name: "",
+      filterBy: "All",
+      loading: false,
       boardData: {},
       totalConverted: 0,
       totalLead: 0,
-      filterBy: "All",
-      loading: false,
       people: []
     };
+    
     this.getMenuItem()
+
+    monday.storage.instance.getItem('filterBy').then(res => {
+      let filter = res.data.value
+      console.log("monday.storage.instance.getItem('filterBy')", filter);
+      if (filter) {
+        this.setState({ filterBy: filter })
+      }
+      this.syncData()
+    });
   }
 
   getMenuItem = () => {
     monday.listen("settings", res => {
       this.setState({ settings: res.data });
-      console.log("Settings Data: ", res);
     });
     // TODO: set up event listeners
     monday.listen("context", res => {
       this.setState({ context: res.data });
-      console.log("context",res.data);
+      console.log(res.data);
       monday.api(`{
           boards(ids: 1890240262) {
             items {
@@ -90,6 +99,7 @@ class App extends React.Component {
 
   syncData = () => {
     this.setState({ loading: true })
+
     monday.listen("settings", res => {
       this.setState({ settings: res.data });
     });
@@ -122,6 +132,7 @@ class App extends React.Component {
           const allData = []
           const totalConverted = []
           const totalLead = []
+          const allPeople = []
 
           if (res.data.boards) {
             res.data.boards[0].items.map(item => allData.push(item.column_values))
@@ -131,47 +142,34 @@ class App extends React.Component {
 
           allData.map((item, i) => {
             item.map(field => {
-              if (field.id == "status9" && field.text == "Appointment Shown") {
-                allData[i].map(field2 => {
-                  if (field2.id == "date4" && (field2.text != null || field2.text != "") && moment().format("M") == moment(field2.text).format("M")) {
-                    totalConverted.push(field2.text)
-                  }
-                })
-              }
-
-              if (field.id == "date4" && (field.text != null || field.text != "") && moment().format("M") == moment(field.text).format("M")) {
-                totalLead.push(field.text)
+              if (field.id == "date4" && field.text && moment().format("M") == moment(field.text).format("M")) {
+                totalLead.push(i)
               }
             })
           })
 
           this.setState({
-            totalLead: allData.length,
-            totalConverted: totalConverted.length,
+            totalLead: totalLead.length,
             loading: false
           })
 
-          console.log({
-            totalLead: allData.length,
-            totalConverted: totalConverted.length
-          })
 
         });
+
     })
   }
 
-
-
-  componentDidMount() {
-    this.syncData()
-  }
 
   handleChange = (event) => {
     console.log(event.target.value)
     this.setState({ filterBy: event.target.value });
     this.syncData()
-  };
 
+    monday.storage.instance.setItem('filterBy', event.target.value).then(res => {
+      console.log(" monday.storage.instance.setItem('filterBy'): ",res);
+    });
+
+  };
 
   render() {
     return <div className="App" style={{ background: (this.state.settings.background) }}>
@@ -190,12 +188,12 @@ class App extends React.Component {
 
         <Box sx={{ minWidth: 120, maxWidth: 300 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">People</InputLabel>
+            <InputLabel id="demo-simple-select-label">Smile Setter</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               value={this.state.filterBy}
-              label={"people"}
+              label={"Smile Setter"}
               onChange={(e) => this.handleChange(e)}
               disabled={this.state.loading}
             >
@@ -216,7 +214,7 @@ class App extends React.Component {
         {this.state.loading && <div style={{ margin: "auto", maxWidth: 71 }}>
           <ReactLoading type={"bubbles"} color="#0073ea" />
         </div>}
-        {!this.state.loading && <h2 style={{ fontSize: 75 }}>{(parseFloat((this.state.totalConverted / this.state.totalLead) * 100) || 0).toFixed(1)}%</h2>}
+        {!this.state.loading && <h2 style={{ fontSize: 75 }}>{this.state.totalLead || 0}</h2>}
       </div>
 
     </div>;

@@ -190,12 +190,12 @@ class App extends React.Component {
 
         <Box sx={{ minWidth: 120, maxWidth: 300 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">People</InputLabel>
+            <InputLabel id="demo-simple-select-label">Smile Setter</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               value={this.state.filterBy}
-              label={"people"}
+              label={"Smile Setter"}
               onChange={(e) => this.handleChange(e)}
               disabled={this.state.loading}
             >

@@ -37,7 +37,17 @@ class App extends React.Component {
       totalLead: 0,
       people: []
     };
+    
     this.getMenuItem()
+
+    monday.storage.instance.getItem('filterBy').then(res => {
+      let filter = res.data.value
+      console.log("monday.storage.instance.getItem('filterBy')", filter);
+      if (filter) {
+        this.setState({ filterBy: filter })
+      }
+      this.syncData()
+    });
   }
 
   getMenuItem = () => {
@@ -150,14 +160,15 @@ class App extends React.Component {
   }
 
 
-  componentDidMount() {
-    this.syncData()
-  }
-
   handleChange = (event) => {
     console.log(event.target.value)
     this.setState({ filterBy: event.target.value });
     this.syncData()
+
+    monday.storage.instance.setItem('filterBy', event.target.value).then(res => {
+      console.log(" monday.storage.instance.setItem('filterBy'): ",res);
+    });
+
   };
 
   render() {
@@ -177,12 +188,12 @@ class App extends React.Component {
 
         <Box sx={{ minWidth: 120, maxWidth: 300 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">People</InputLabel>
+            <InputLabel id="demo-simple-select-label">Smile Setter</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               value={this.state.filterBy}
-              label={"people"}
+              label={"Smile Setter"}
               onChange={(e) => this.handleChange(e)}
               disabled={this.state.loading}
             >
